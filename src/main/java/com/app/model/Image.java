@@ -10,36 +10,33 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Setter
-@Getter
+@Data
 @Entity
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "student")
-public class Student {
+@Table(name = "images")
+@AllArgsConstructor
+public class Image {
 
     @Id
     @GeneratedValue
     private Long id;
 
-    @Column(name = "name", nullable = false)
+    @Column(length = 100)
     private String name;
 
-    @Column(name = "second_name", nullable = false)
-    private String secondName;
+    private Long size;
 
-    @Column(name = "grade", nullable = false)
-    private Integer grade;
+    @Column(length = 300)
+    private String uid;
 
     @OneToOne
     @JoinTable(
         name = "student_image",
-        joinColumns = @JoinColumn(name = "student_id"),
-        inverseJoinColumns = @JoinColumn(name = "image_id"))
-    private Image image;
+        joinColumns = @JoinColumn(name = "image_id"),
+        inverseJoinColumns = @JoinColumn(name = "student_id"))
+    private Student student;
 }

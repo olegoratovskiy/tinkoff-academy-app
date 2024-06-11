@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  */
 @RestControllerAdvice
 @RequiredArgsConstructor
-public class BaseExceptionHandler extends DataFetcherExceptionResolverAdapter {
+public class GraphqlExceptionHandler extends DataFetcherExceptionResolverAdapter {
 
     @Override
     protected GraphQLError resolveToSingleError(Throwable ex, DataFetchingEnvironment env) {
