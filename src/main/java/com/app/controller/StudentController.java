@@ -1,28 +1,59 @@
 package com.app.controller;
 
-import com.app.dto.StudentInput;
+import com.app.dto.AddStudentRequestDto;
+import com.app.dto.ImageDto;
+import com.app.dto.StudentDto;
+import com.app.model.Image;
 import com.app.model.Student;
 import com.app.service.StudentService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.graphql.data.method.annotation.Argument;
-import org.springframework.graphql.data.method.annotation.MutationMapping;
-import org.springframework.graphql.data.method.annotation.QueryMapping;
-import org.springframework.stereotype.Controller;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisHash;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RedisHash
+@RestController
+@RequestMapping("/student")
 @RequiredArgsConstructor
 public class StudentController {
 
-    private final StudentService studentService;
+    private final StudentService service;
 
-    @QueryMapping
-    public Student studentById(@Argument long id) {
-        return studentService.getById(id);
+    @Cacheable(value = "StudentController::get", key = "#id")
+    @GetMapping("/{id}")
+    public StudentDto get(@PathVariable long id) {
+        Student student = service.getById(id);
+        return toDto(student);
     }
 
-    @MutationMapping
-    public Student addStudent(@Argument StudentInput input) {
-        return studentService.add(input);
+    @Cacheable(value = "StudentController::getImage", key = "#id + '.image'")
+    @GetMapping("/{id}/image")
+    public ImageDto getImage(@PathVariable long id) {
+        Image image = service.getImage(id);
+        return new ImageDto(
+            image.getName(),
+            image.getSize(),
+            image.getUid()
+        );
     }
 
+    @PostMapping("/add")
+    public StudentDto add(@RequestBody AddStudentRequestDto dto) {
+        Student student = service.add(dto);
+        return toDto(student);
+    }
+
+    private StudentDto toDto(Student student) {
+        return new StudentDto(
+            student.getId(),
+            student.getName(),
+            student.getSecondName(),
+            student.getGrade()
+        );
+    }
 }
